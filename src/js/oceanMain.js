@@ -1,20 +1,25 @@
-import { initFrameVideoPlayer } from './framePlayer.js';
+import { initOceanSunset } from './oceanSunset.js';
 import { initScrollAnimate } from './scrollAnimate.js';
-import { initForestPath } from './forestPath.js';
-import { initDisplacement } from './displacement.js';
+import './audioManager.js';
 
-const setupNavigation = () => {
-    const knowAboutUsBtns = document.querySelectorAll('#hero-know-about-us-btn, #nav-know-us-btn');
-    knowAboutUsBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const page1 = document.getElementById('page1');
-            if (page1) {
-                page1.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-    });
+const start = () => {
+    const oceanCanvas = document.getElementById('c') || document.getElementById('ocean');
+    if (oceanCanvas) {
+        try {
+            const ocean = initOceanSunset(oceanCanvas, { projects: ['PROJECT 1', 'PROJECT 2', 'PROJECT 3', 'PROJECT 4'] });
+            if (ocean) ocean.resume();
+        } catch (err) {
+            console.error('OceanSunset error:', err);
+        }
+    }
 
+    try {
+        initScrollAnimate();
+    } catch (err) {
+        console.error('ScrollAnimate error:', err);
+    }
+
+    // Navigation drawer handlers
     const menuToggleBtns = document.querySelectorAll('.menu-toggle-btn');
     const navDrawer = document.getElementById('nav-drawer');
     const navBackdrop = document.getElementById('nav-backdrop');
@@ -54,6 +59,7 @@ const setupNavigation = () => {
         });
     });
 
+    // Form submission handler
     const contactForm = document.getElementById('contact-form');
     const formStatus = document.getElementById('form-status');
     if (contactForm) {
@@ -68,42 +74,6 @@ const setupNavigation = () => {
             }, 6000);
         });
     }
-};
-
-const start = () => {
-    try {
-        initForestPath();
-    } catch (err) {
-        console.error('ForestPath error:', err);
-    }
-
-    try {
-        const heroContainer = document.getElementById('landing-hero') || document.getElementById('hero');
-        if (heroContainer) {
-            initDisplacement(heroContainer, { ink: 0.6, flow: 0.0, split: 0.25 });
-        }
-        document.querySelectorAll('.hero-fx').forEach(el => {
-            if (el !== heroContainer) {
-                initDisplacement(el, { ink: 0.6, flow: 0.0, split: 0.25 });
-            }
-        });
-    } catch (err) {
-        console.error('Displacement error:', err);
-    }
-
-    try {
-        initScrollAnimate();
-    } catch (err) {
-        console.error('ScrollAnimate error:', err);
-    }
-
-    try {
-        initFrameVideoPlayer();
-    } catch (err) {
-        console.error('FrameVideoPlayer error:', err);
-    }
-
-    setupNavigation();
 };
 
 if (document.readyState === 'loading') {

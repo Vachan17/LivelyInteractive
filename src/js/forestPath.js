@@ -1012,32 +1012,45 @@ export function initForestPath() {
   resize();
   frame();
 
-  // IntersectionObserver to pause rendering when hero is scrolled offscreen
-  const heroElement = document.getElementById('landing-hero');
-  if (heroElement && 'IntersectionObserver' in window) {
+  function pause() {
+    isRunning = false;
+    if (animId) {
+      cancelAnimationFrame(animId);
+      animId = null;
+    }
+  }
+
+  function resume() {
+    if (isRunning) return;
+    isRunning = true;
+    clock.start();
+    frame();
+  }
+
+  // IntersectionObserver to pause rendering when forest background is offscreen
+  const bgContainer = document.getElementById('bg-3d-container') || document.getElementById('landing-hero');
+  if (bgContainer && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          if (!isRunning) {
-            isRunning = true;
-            clock.start();
-            frame();
-          }
+          resume();
         } else {
-          isRunning = false;
-          if (animId) cancelAnimationFrame(animId);
+          pause();
         }
       });
-    }, { threshold: 0.05 });
-    observer.observe(heroElement);
+    }, { threshold: 0.01 });
+    observer.observe(bgContainer);
   }
 
   return {
     resize,
+    pause,
+    resume,
+    get isRunning() { return isRunning; },
     destroy() {
-      isRunning = false;
-      if (animId) cancelAnimationFrame(animId);
+      pause();
       window.removeEventListener('resize', resize);
     }
   };
 }
+

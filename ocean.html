@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lively Interactive — Ocean Horizons & Showcase</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<!-- Animate.css v4 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<!-- Three.js CDN (r128) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0D0D0E',
+              offwhite: '#F4F4F4',
+              surface: '#FFFFFF',
+              muted: '#7A7A7E',
+              border: '#18181A'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+            syne: ['Syne', 'sans-serif'],
+            script: ['"Great Vibes"', 'cursive']
+          }
+        }
+      }
+    }
+</script>
+<style data-purpose="custom-styles">
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #2a1220;
+    }
+    .great-vibes-regular {
+      font-family: "Great Vibes", cursive;
+      font-weight: 400;
+    }
+</style>
+</head>
+<body class="text-white min-h-screen selection:bg-white selection:text-black relative overflow-x-hidden m-0 p-0 font-sans">
+
+<!-- 3D Sunset Ocean Fixed Full Screen Canvas Background with 3D Text & Water Reflections -->
+<canvas id="c" class="fixed inset-0 w-full h-full block pointer-events-none z-0"></canvas>
+
+<!-- Top Fixed Header Bar -->
+<header class="fixed top-0 left-0 w-full z-40 px-4 sm:px-8 lg:px-12 py-4 sm:py-5 flex items-center justify-between backdrop-blur-md bg-black/25 border-b border-white/10 text-white shadow-lg pointer-events-auto">
+  <div class="flex items-center">
+    <a href="index.html" class="text-[9px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] font-semibold text-white hover:text-white/80 transition-colors">LIVELY INTERACTIVE</a>
+  </div>
+  <div class="flex items-center">
+    <button aria-label="Toggle menu" class="menu-toggle-btn space-y-1 sm:space-y-1.5 pl-2 cursor-pointer focus:outline-none" type="button">
+      <span class="block w-5 sm:w-6 h-[2px] bg-white"></span>
+      <span class="block w-5 sm:w-6 h-[2px] bg-white"></span>
+    </button>
+  </div>
+</header>
+
+<!-- SCROLL SECTIONS CONTAINER -->
+<div id="page-content" class="relative z-[3] w-full pt-16">
+  <main class="relative z-10 w-full">
+
+    <!-- PAGE 01: WE BUILD -->
+    <section class="min-h-screen relative pointer-events-none" id="page1"></section>
+
+    <!-- PAGE 02: DIGITAL EXPERIENCES. -->
+    <section class="min-h-screen relative pointer-events-none" id="page2"></section>
+
+    <!-- PAGE 03: WE TURN IDEAS -->
+    <section class="min-h-screen relative pointer-events-none" id="page3"></section>
+
+    <!-- PAGE 04: INTO DIGITAL PRODUCTS. -->
+    <section class="min-h-screen relative pointer-events-none" id="page4"></section>
+
+    <!-- PAGE 05-07: THE CLOTH (projects printed on white fabric; text lives in the 3D scene) -->
+    <section class="min-h-screen relative pointer-events-none" id="cloth-start"></section>
+    <section class="min-h-screen relative pointer-events-none" id="page6"></section>
+    <section class="min-h-screen relative pointer-events-none" id="page7"></section>
+
+    <!-- Footer / Colophon -->
+    <footer class="pt-4 pb-12 px-6 flex flex-col sm:flex-row items-center justify-between text-white/80 font-mono text-[9px] sm:text-[10px] tracking-widest uppercase gap-4 text-center sm:text-left pointer-events-auto" data-purpose="page-footer">
+      <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 mx-auto sm:mx-0">
+        <span class="text-white font-bold">LIVELY INTERACTIVE // SOFTWARE SOLUTIONS</span>
+        <span class="text-white/60">ARCHIVE © 2026</span>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<!-- Fullscreen Glassmorphism Navigation Menu Drawer Modal -->
+<div id="nav-drawer" class="fixed inset-0 z-50 pointer-events-none opacity-0 transition-opacity duration-300 flex justify-end">
+  <div id="nav-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer"></div>
+  <div id="nav-panel" class="relative z-10 max-w-[85vw] sm:max-w-md w-full bg-[#0D0D0E] border-l border-white/15 h-full p-6 sm:p-8 flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-out shadow-2xl">
+    <div>
+      <div class="flex items-center justify-between pb-6 sm:pb-8 border-b border-white/10">
+        <span class="font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white font-bold">LIVELY INTERACTIVE</span>
+        <button id="nav-close-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-colors cursor-pointer" type="button" aria-label="Close menu">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <nav class="mt-8 sm:mt-10 space-y-4 sm:space-y-6">
+        <a href="index.html" class="group flex items-center justify-between text-lg sm:text-xl font-display font-bold text-white/80 hover:text-white transition-colors">
+          <span>01 // Home</span>
+          <span class="text-xs font-mono text-white group-hover:translate-x-1 transition-transform">→</span>
+        </a>
+        <a href="ocean.html" class="group flex items-center justify-between text-lg sm:text-xl font-display font-bold text-amber-300 transition-colors">
+          <span>02 // About Us</span>
+          <span class="text-xs font-mono text-amber-300">✦</span>
+        </a>
+        <a href="contact.html" class="group flex items-center justify-between text-lg sm:text-xl font-display font-bold text-white/80 hover:text-white transition-colors">
+          <span>03 // Contact Us</span>
+          <span class="text-xs font-mono text-white group-hover:translate-x-1 transition-transform">→</span>
+        </a>
+      </nav>
+    </div>
+    <div class="pt-6 sm:pt-8 border-t border-white/10 space-y-2 sm:space-y-3 font-mono text-[11px] sm:text-xs text-white/70">
+      <p>IG — <a href="https://instagram.com/lively_interactive" target="_blank" rel="noopener" class="text-white hover:underline">@lively_interactive</a></p>
+      <p>EMAIL — <a href="mailto:livelyinteractive@gmail.com" class="text-white hover:underline">livelyinteractive@gmail.com</a></p>
+      <p>LEGAL — <a href="privacy.html" class="text-white hover:underline">Privacy Policy</a></p>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/src/js/oceanMain.js"></script>
+<script type="module" src="/src/js/liquidText.js"></script>
+</body>
+</html>

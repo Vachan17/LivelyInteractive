@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Privacy Policy — Lively Interactive</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0b0c10;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between selection:bg-white selection:text-black">
+
+  <!-- Ambient Glow Background -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px]"></div>
+    <div class="absolute top-1/2 -right-40 w-96 h-96 bg-blue-500/10 rounded-full blur-[140px]"></div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="relative z-20 flex items-center justify-between px-6 sm:px-12 py-6 border-b border-white/10">
+    <a href="index.html" class="flex items-center gap-2">
+      <span class="font-mono text-xs uppercase tracking-[0.25em] font-bold text-white/90 hover:text-white transition-colors">
+        LIVELY INTERACTIVE
+      </span>
+    </a>
+    <a href="contact.html" class="text-xs font-mono uppercase tracking-wider text-white/80 hover:text-white underline transition-colors">
+      ← Back to Contact
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="relative z-10 flex-1 max-w-3xl w-full mx-auto px-6 py-12 sm:py-16">
+    <div class="glass-card rounded-2xl p-6 sm:p-10 shadow-2xl space-y-8">
+      <div>
+        <span class="font-mono text-[10px] uppercase tracking-[0.25em] text-white/50 block mb-2">Legal Documentation</span>
+        <h1 class="font-display font-black text-3xl sm:text-4xl text-white tracking-tight">PRIVACY POLICY</h1>
+        <p class="font-mono text-xs text-white/50 mt-1">Effective Date: October 2026</p>
+      </div>
+
+      <div class="space-y-6 text-sm text-white/80 leading-relaxed font-light">
+        <section class="space-y-2">
+          <h2 class="font-display font-bold text-base text-white tracking-wide uppercase">1. Introduction</h2>
+          <p>
+            Lively Interactive ("we", "our", or "us") is dedicated to respecting and protecting your privacy. This Privacy Policy details how we handle information collected through our website and project inquiries.
+          </p>
+        </section>
+
+        <section class="space-y-2">
+          <h2 class="font-display font-bold text-base text-white tracking-wide uppercase">2. Information We Collect</h2>
+          <p>
+            When you initiate contact or submit a project inquiry, we may collect information including your name, email address, project requirements, and any notes or attachments you provide voluntarily.
+          </p>
+        </section>
+
+        <section class="space-y-2">
+          <h2 class="font-display font-bold text-base text-white tracking-wide uppercase">3. How We Use Information</h2>
+          <p>
+            Any information submitted is used solely to evaluate your project scope, correspond with you regarding inquiries, and deliver our bespoke web applications, mobile software, and AI solutions. We never sell, rent, or distribute personal data to third parties.
+          </p>
+        </section>
+
+        <section class="space-y-2">
+          <h2 class="font-display font-bold text-base text-white tracking-wide uppercase">4. Data Security</h2>
+          <p>
+            We deploy standard security measures and protocols to protect the confidentiality and integrity of your data against unauthorized access, modification, or exposure.
+          </p>
+        </section>
+
+        <section class="space-y-2">
+          <h2 class="font-display font-bold text-base text-white tracking-wide uppercase">5. Contact</h2>
+          <p>
+            If you have questions regarding this Privacy Policy or wish to inquire about your data, contact us directly at
+            <a href="mailto:livelyinteractive@gmail.com" class="text-white underline hover:text-amber-300 transition-colors">livelyinteractive@gmail.com</a>.
+          </p>
+        </section>
+      </div>
+
+      <div class="pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 font-mono text-xs text-white/60">
+        <p>© 2026 Lively Interactive. All rights reserved.</p>
+        <div class="flex items-center space-x-4">
+          <a href="index.html" class="underline hover:text-white transition-colors">Home</a>
+          <a href="ocean.html" class="underline hover:text-white transition-colors">About Us</a>
+          <a href="contact.html" class="underline hover:text-white transition-colors">Contact</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="relative z-10 py-6 text-center font-mono text-[10px] uppercase tracking-widest text-white/40">
+    Lively Interactive Studio
+  </footer>
+
+</body>
+</html>

@@ -1,43 +1,47 @@
+/**
+ * ScrollAnimate - Smooth Fade-In and Fade-Out Observer for Showcase Cards
+ * Animates Cards 01-04 into view when scrolling down and out of view when scrolling away.
+ */
 export function initScrollAnimate() {
-    const animatedElements = document.querySelectorAll('[data-animate]');
-    if (!animatedElements.length) return;
+    const cards = document.querySelectorAll('#page1, #page2, #page3, #page4');
+    if (!cards.length) return;
 
-    const revealElement = (el) => {
-        const animationClass = el.dataset.animate || 'animate__fadeInRight';
-        el.classList.remove('opacity-0');
-        el.classList.add('animate__animated', animationClass);
-    };
+    cards.forEach(card => {
+        card.style.transition = 'opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1)';
+        card.style.willChange = 'opacity, transform';
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(40px)';
+    });
 
     if (!('IntersectionObserver' in window)) {
-        animatedElements.forEach(revealElement);
+        cards.forEach(card => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0px)';
+        });
         return;
     }
 
-    const observer = new IntersectionObserver((entries, obs) => {
+    const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                revealElement(entry.target);
-                obs.unobserve(entry.target);
+                // Smooth Fade In & Slide Up into position
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0px)';
+            } else {
+                // Smooth Fade Out as card leaves viewport
+                entry.target.style.opacity = '0';
+                const rect = entry.boundingClientRect;
+                if (rect.top < 0) {
+                    entry.target.style.transform = 'translateY(-30px)';
+                } else {
+                    entry.target.style.transform = 'translateY(30px)';
+                }
             }
         });
     }, {
-        threshold: 0.05,
-        rootMargin: '50px 0px 50px 0px'
+        threshold: 0.12,
+        rootMargin: '0px 0px 0px 0px'
     });
 
-    animatedElements.forEach(el => observer.observe(el));
-
-    // Fallback check to ensure elements in viewport on load are instantly revealed
-    const checkViewport = () => {
-        animatedElements.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            if (rect.top < window.innerHeight + 100 && rect.bottom >= -100) {
-                revealElement(el);
-            }
-        });
-    };
-
-    checkViewport();
-    setTimeout(checkViewport, 150);
+    cards.forEach(card => observer.observe(card));
 }
-

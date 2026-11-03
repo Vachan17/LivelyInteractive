@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lively Interactive — Contact Us (3D Forest Path)</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+<!-- Three.js CDN (r128) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+            script: ['"Great Vibes"', 'cursive']
+          }
+        }
+      }
+    }
+</script>
+<style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #f0b898;
+      font-family: 'Inter', sans-serif;
+    }
+    .glass-card {
+      background: rgba(18, 12, 10, 0.65);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-pill:hover {
+      background: rgba(255, 255, 255, 0.28);
+      border-color: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.7);
+    }
+    #vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0) 25%, rgba(14, 10, 6, 0.45) 65%, rgba(6, 4, 2, 0.85) 90%, rgba(0, 0, 0, 0.97) 100%);
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.75);
+    }
+
+</style>
+</head>
+<body class="text-white relative min-h-screen selection:bg-white selection:text-black">
+
+<!-- 3D Forest Path Fixed Full Screen Background -->
+<div id="bg-3d-container" class="fixed inset-0 w-full h-full z-0 overflow-hidden">
+  <canvas id="c" class="absolute inset-0 w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+  <div id="vignette"></div>
+</div>
+
+<!-- Top Navigation Header -->
+<header class="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 sm:px-8 lg:px-12 py-5 pointer-events-auto">
+  <div class="flex items-center space-x-3">
+    <a href="index.html" class="flex items-center gap-2 group">
+      <span class="font-mono text-[10px] sm:text-xs uppercase tracking-[0.25em] font-bold text-white/90 group-hover:text-white transition-colors">
+        LIVELY INTERACTIVE
+      </span>
+    </a>
+  </div>
+  <div class="flex items-center">
+    <button aria-label="Toggle menu" id="menu-toggle-btn" class="glass-pill p-2 sm:p-2.5 rounded-full cursor-pointer focus:outline-none flex items-center justify-center" type="button">
+      <div class="space-y-1">
+        <span class="block w-4 sm:w-5 h-[2px] bg-white"></span>
+        <span class="block w-4 sm:w-5 h-[2px] bg-white"></span>
+      </div>
+    </button>
+  </div>
+</header>
+
+<!-- Main Contact Section Overlay -->
+<div class="relative z-10 w-full min-h-screen flex items-center justify-between px-5 sm:px-8 lg:px-12 pt-24 sm:pt-28 pb-24 lg:py-20 pointer-events-auto">
+  <main class="w-full max-w-full">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 lg:gap-12 lg:min-h-[500px]">
+      
+      <!-- Far Left Title & Information Column -->
+      <div class="max-w-lg w-full space-y-6 sm:space-y-8 lg:ml-2">
+        <!-- Giant Bold Title -->
+        <div>
+          <h1 class="font-display font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] leading-[1.05] select-none">
+            HAVE AN IDEA?<br/>LET'S TALK.
+          </h1>
+        </div>
+        
+        <!-- Description in clean, legible typography -->
+        <p class="font-sans text-xs sm:text-sm text-white/90 leading-relaxed drop-shadow-md max-w-md font-normal">
+          Whether you need a bespoke web application, mobile product, custom software, or AI automation, we are ready to build it.
+        </p>
+
+        <!-- Contact Links and Privacy Policy Anchor Tag -->
+        <div class="space-y-2.5 pt-5 border-t border-white/20 max-w-md drop-shadow-md font-mono text-xs">
+          <p class="flex items-center gap-2">
+            <span class="text-white/60 text-[10px] uppercase tracking-wider font-semibold">IG —</span>
+            <a href="https://instagram.com/lively_interactive" target="_blank" rel="noopener" class="text-white font-medium underline underline-offset-4 hover:text-amber-300 transition-colors">@lively_interactive</a>
+          </p>
+          <p class="flex items-center gap-2">
+            <span class="text-white/60 text-[10px] uppercase tracking-wider font-semibold">EMAIL —</span>
+            <a href="mailto:livelyinteractive@gmail.com" class="text-white font-medium underline underline-offset-4 hover:text-amber-300 transition-colors">livelyinteractive@gmail.com</a>
+          </p>
+          <p class="pt-1">
+            <a href="privacy.html" class="text-[11px] font-sans text-white/60 hover:text-white underline underline-offset-4 transition-colors">Privacy Policy</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Center Viewport Space (Wide Open for 3D Forest Path) -->
+      <div class="hidden lg:block flex-1 min-w-[100px]"></div>
+
+      <!-- Far Right Form Column Card — visible on lg+, hidden on mobile (uses bottom sheet instead) -->
+      <div class="hidden lg:block max-w-md w-full bg-black/45 backdrop-blur-md p-6 sm:p-7 rounded-2xl border border-white/20 shadow-2xl lg:mr-2 self-center">
+        <form id="contact-page-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-mono text-[9px] uppercase tracking-wider text-white/90 font-bold mb-1.5 drop-shadow">Name</label>
+              <input type="text" required class="w-full bg-black/40 border border-white/25 text-white rounded-lg p-3 text-xs focus:outline-none focus:border-white focus:bg-black/60 placeholder-white/40 transition-colors"/>
+            </div>
+            <div>
+              <label class="block font-mono text-[9px] uppercase tracking-wider text-white/90 font-bold mb-1.5 drop-shadow">Email</label>
+              <input type="email" required class="w-full bg-black/40 border border-white/25 text-white rounded-lg p-3 text-xs focus:outline-none focus:border-white focus:bg-black/60 placeholder-white/40 transition-colors"/>
+            </div>
+          </div>
+          <div>
+            <label class="block font-mono text-[9px] uppercase tracking-wider text-white/90 font-bold mb-1.5 drop-shadow">What do you want to build?</label>
+            <select class="w-full bg-black/50 border border-white/25 text-white rounded-lg p-3 text-xs focus:outline-none focus:border-white transition-colors">
+              <option class="bg-[#18181B] text-white">Website / Portfolios</option>
+              <option class="bg-[#18181B] text-white">Mobile / Web Application</option>
+              <option class="bg-[#18181B] text-white">Custom Software</option>
+              <option class="bg-[#18181B] text-white">AI &amp; Automation Workflows</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-[9px] uppercase tracking-wider text-white/90 font-bold mb-1.5 drop-shadow">Message</label>
+            <textarea required rows="4" class="w-full bg-black/40 border border-white/25 text-white rounded-lg p-3 text-xs focus:outline-none focus:border-white focus:bg-black/60 placeholder-white/40 transition-colors"></textarea>
+          </div>
+          <button type="submit" class="w-full bg-white hover:bg-neutral-200 text-black font-mono text-xs uppercase tracking-widest py-3.5 px-6 rounded-lg transition-colors font-bold shadow-2xl cursor-pointer">
+            SEND PROJECT REQUEST
+          </button>
+          <div id="contact-form-status" class="hidden p-3.5 rounded-lg bg-emerald-900/90 border border-emerald-500/50 text-emerald-200 font-mono text-xs font-semibold">
+            ✓ Thank you! Your project request has been submitted to Lively Interactive.
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Navigation Menu Drawer Modal -->
+<div id="nav-drawer" class="fixed inset-0 z-50 pointer-events-none opacity-0 transition-opacity duration-300 flex justify-end">
+  <div id="nav-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer"></div>
+  <div id="nav-panel" class="relative z-10 max-w-[85vw] sm:max-w-md w-full bg-white border-l border-black/10 h-full p-6 sm:p-8 flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-out shadow-2xl">
+    <div>
+      <div class="flex items-center justify-between pb-6 sm:pb-8 border-b border-black/10">
+        <span class="font-mono text-[10px] sm:text-xs uppercase tracking-[0.25em] text-black font-bold">LIVELY INTERACTIVE</span>
+        <button id="nav-close-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/10 hover:bg-black/20 border border-black/20 text-black flex items-center justify-center transition-colors cursor-pointer" type="button" aria-label="Close menu">
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <nav class="mt-8 sm:mt-10 space-y-4 sm:space-y-6">
+        <a href="index.html" class="group flex items-center justify-between text-lg sm:text-xl font-display font-bold text-black/70 hover:text-black transition-colors">
+          <span>01 // Home</span>
+          <span class="text-xs font-mono text-black group-hover:translate-x-1 transition-transform">→</span>
+        </a>
+        <a href="ocean.html" class="group flex items-center justify-between text-lg sm:text-xl font-display font-bold text-black/70 hover:text-black transition-colors">
+          <span>02 // About Us</span>
+          <span class="text-xs font-mono text-black group-hover:translate-x-1 transition-transform">→</span>
+        </a>
+        <a href="contact.html" class="group flex items-center justify-between text-lg sm:text-xl font-display font-bold text-amber-500 transition-colors">
+          <span>03 // Contact Us</span>
+          <span class="text-xs font-mono text-amber-500">✦</span>
+        </a>
+      </nav>
+    </div>
+    <div class="pt-6 sm:pt-8 border-t border-black/10 space-y-2 sm:space-y-3 font-mono text-[11px] sm:text-xs text-black/60">
+      <p>IG — <a href="https://instagram.com/lively_interactive" target="_blank" rel="noopener" class="text-black hover:underline">@lively_interactive</a></p>
+      <p>EMAIL — <a href="mailto:livelyinteractive@gmail.com" class="text-black hover:underline">livelyinteractive@gmail.com</a></p>
+      <p>LEGAL — <a href="privacy.html" class="text-black hover:underline">Privacy Policy</a></p>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/src/js/forestMain.js"></script>
+<script>
+  /* ── Nav drawer ── */
+  const menuBtn    = document.getElementById('menu-toggle-btn');
+  const navDrawer  = document.getElementById('nav-drawer');
+  const navBackdrop = document.getElementById('nav-backdrop');
+  const navPanel   = document.getElementById('nav-panel');
+  const navCloseBtn = document.getElementById('nav-close-btn');
+
+  const openDrawer = () => {
+    if (!navDrawer || !navPanel) return;
+    navDrawer.classList.remove('pointer-events-none', 'opacity-0');
+    navDrawer.classList.add('opacity-100');
+    navPanel.classList.remove('translate-x-full');
+  };
+  const closeDrawer = () => {
+    if (!navDrawer || !navPanel) return;
+    navPanel.classList.add('translate-x-full');
+    navDrawer.classList.remove('opacity-100');
+    navDrawer.classList.add('opacity-0', 'pointer-events-none');
+  };
+  if (menuBtn)     menuBtn.addEventListener('click', openDrawer);
+  if (navCloseBtn) navCloseBtn.addEventListener('click', closeDrawer);
+  if (navBackdrop) navBackdrop.addEventListener('click', closeDrawer);
+
+  /* ── Desktop form submission ── */
+  const form   = document.getElementById('contact-page-form');
+  const status = document.getElementById('contact-form-status');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (status) status.classList.remove('hidden');
+      form.reset();
+      setTimeout(() => { if (status) status.classList.add('hidden'); }, 6000);
+    });
+  }
+</script>
+<script type="module" src="/src/js/liquidText.js"></script>
+</body>
+</html>
