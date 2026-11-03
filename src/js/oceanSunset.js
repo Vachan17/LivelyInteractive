@@ -38,14 +38,15 @@ export function initOceanSunset(canvas, options) {
   let yaw = 0, pitch = BASE_PITCH;
 
   /* ---------------- scroll timeline ----------------
-     P = scroll progress 0..1 over the whole page
-       0.00-0.40  slow drift forward on the surface
-       0.10-0.46  a big wave rolls in and hits the camera
-       0.40-0.64  camera sinks slowly under the water
-       0.64-1.00  glides over the sea floor, one headline at a time                 */
+     P = scroll progress 0..1 over the whole page:
+       0.00-0.30  slow drift forward on the surface & big wave rolls in
+       0.30-1.00  camera dives into the sea down to the ocean floor
+       1.00       camera reaches the ground, scene ends.
+  -------------------------------------------------- */
   const SEABED_Y = -26;
-  const UNDER_Y = SEABED_Y + 12;       // high enough to look down onto the sand text
-  const UNDER_PITCH = -0.30;
+  const GROUND_Y = SEABED_Y + 2.8;      // resting height right at the seabed ground
+  const UNDER_Y = GROUND_Y;
+  const UNDER_PITCH = -0.06;
   function smooth01(a, b, x) {
     const u = Math.min(1, Math.max(0, (x - a) / (b - a)));
     return u * u * (3 - 2 * u);
@@ -55,8 +56,7 @@ export function initOceanSunset(canvas, options) {
     return u * u * u * (u * (u * 6 - 15) + 10);
   }
   function camZAt(P) {
-    const u = Math.min(1, Math.max(0, (P - 0.64) / 0.36));
-    return -26 * smooth01(0, 0.40, P) - 9 * ease01(0.40, 0.64, P) - 250 * (u * u * (3 - 2 * u));
+    return -20 * smooth01(0, 0.30, P) - 60 * ease01(0.30, 1.00, P);
   }
   function bigWaveH(x, z, t, zc, H) {
     const s = (z - zc) / 16;
@@ -335,16 +335,11 @@ export function initOceanSunset(canvas, options) {
   scene.add(sky);
 
   /* ---------------- 3D Ocean Text Landmarks & Water Reflections ---------------- */
-  const textData = [
-    { id: 'page1', text: 'WE BUILD' },
-    { id: 'page2', text: 'DIGITAL EXPERIENCES.' },
-    { id: 'page3', text: 'WE TURN IDEAS' },
-    { id: 'page4', text: 'INTO DIGITAL PRODUCTS.' }
-  ];
+  const textData = options.texts || [];
   // headline 1 floats on the surface; 2-4 appear one by one on the sea floor
-  const textUnder = [false, true, true, true];
+  const textUnder = options.textUnder || [];
   const UNDER_TEXT_P = [0.70, 0.80, 0.90];            // scroll position where each is centred
-  const textDistances = [-52].concat(UNDER_TEXT_P.map((pp) => camZAt(pp) - 34));
+  const textDistances = textData.length ? [-52].concat(UNDER_TEXT_P.map((pp) => camZAt(pp) - 34)).slice(0, textData.length) : [];
 
   function createTextTexture(text, hiRes) {
     const canvas = document.createElement('canvas');
@@ -589,7 +584,7 @@ export function initOceanSunset(canvas, options) {
   // ONE smoothed scroll position drives both the ocean (P) and the cloth (Q), so the cloth can only exist
   // while the ocean is at its very end - scrolling back never leaves a cloth hanging in an earlier scene.
   let scrollTarget = 0, scrollNow = 0, oceanLenPx = 1, maxPx = 1;
-  const clothEnabled = options.cloth !== false;
+  const clothEnabled = options.cloth === true;
   // Share of the page's scroll given to the cloth when the page has no #cloth-start marker element.
   const clothShare = options.clothShare != null ? options.clothShare : 0.4;
   const clamp01 = (x) => Math.min(1, Math.max(0, x));
@@ -797,7 +792,7 @@ export function initOceanSunset(canvas, options) {
      camera in the middle (where the projects are read), swooping toward the camera and over the sand below,
      and curving away into the distance above. Scrolling feeds the ribbon along the rail.
      Any number of projects: the ribbon gets one block of print per project and grows longer with each one. */
-  let PROJECTS = (options.projects && options.projects.length ? options.projects : ['AURORA', 'NEON ATLAS', 'PAPER MOON', 'LUMEN OS']).map(String);
+  let PROJECTS = (options.projects !== undefined ? options.projects : ['AURORA', 'NEON ATLAS', 'PAPER MOON', 'LUMEN OS']).map(String);
   const CLOTH_DIST = 52;                                   // distance from the final camera position to the reading spot
   const CLOTH_STAGE_Y = UNDER_Y + 1.5;
   const CLOTH_STAGE_Z = camZAt(1) - CLOTH_DIST;
@@ -813,6 +808,23 @@ export function initOceanSunset(canvas, options) {
   // full width. Cells get smaller automatically when there are many projects.
   function makeClothTexture() {
     const n = PROJECTS.length;
+    if (n === 0) {
+      clothGrid = { cols: 1, rows: 1, cell: 1024 };
+      const c = document.createElement('canvas');
+      c.width = 1024; c.height = 1024;
+      const g = c.getContext('2d');
+      g.fillStyle = '#FFFFFF';
+      g.fillRect(0, 0, c.width, c.height);
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = THREE.ClampToEdgeWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      tex.magFilter = THREE.LinearFilter;
+      tex.minFilter = THREE.LinearMipmapLinearFilter;
+      tex.generateMipmaps = true;
+      tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 1);
+      tex.needsUpdate = true;
+      return tex;
+    }
     const maxDim = Math.min(4096, renderer.capabilities.maxTextureSize || 4096);
     let cols = 1; while (cols * cols < n) cols *= 2;
     let rows = 1; while (cols * rows < n) rows *= 2;
@@ -1330,7 +1342,7 @@ export function initOceanSunset(canvas, options) {
         if (d > 4 && d < best) best = d;
       }
     });
-    const target = clothActive ? clothFocus : (isFinite(best) ? best : 55);
+    const target = clothActive ? clothFocus : (isFinite(best) ? best : (uniforms.uUnderMix.value > 0.5 ? 26 : 55));
     dof.focus = dof.ready ? dof.focus + (target - dof.focus) * Math.min(1, dt * 2.5) : target;
     dof.ready = true;
     const u = dofPass.uniforms;
@@ -1437,35 +1449,35 @@ export function initOceanSunset(canvas, options) {
     currentQ = clothEnabled ? clamp01((scrollNow - oceanLenPx) / Math.max(1, maxPx - oceanLenPx)) : 0;
     const P = currentP;
     const Q = currentQ;
-    const diveE = ease01(0.40, 0.64, P);
+    const diveE = ease01(0.30, 1.00, P);
     camera.position.z = camZAt(P);
 
     // the big wave: far ahead at first, reaches the camera as the dive starts, then fades away
-    const waveT = smooth01(0.08, 0.58, P);
-    const waveH = 12 * smooth01(0.05, 0.16, P) * (1 - smooth01(0.62, 0.78, P));
-    const waveZ = camera.position.z - 220 * (1 - waveT) + 8 * waveT;
+    const waveT = smooth01(0.05, 0.40, P);
+    const waveH = 12 * smooth01(0.05, 0.18, P) * (1 - smooth01(0.38, 0.58, P));
+    const waveZ = camera.position.z - 180 * (1 - waveT) + 6 * waveT;
     uniforms.uBig.value.set(waveZ, waveH, 16, 0);
-    const burstAmt = smooth01(0.40, 0.52, P) * (1 - smooth01(0.60, 0.80, P));
+    const burstAmt = smooth01(0.30, 0.42, P) * (1 - smooth01(0.48, 0.65, P));
 
     yaw += (targetYaw - yaw) * Math.min(1, dt * 3);
-    const basePitch = BASE_PITCH + 0.08 * smooth01(0.24, 0.40, P) * (1 - diveE) + (UNDER_PITCH - BASE_PITCH) * diveE
-                      + (0.0 - UNDER_PITCH) * ease01(0.0, 0.2, Q) * diveE;
+    const diveSwoop = smooth01(0.30, 0.70, P) * (1 - smooth01(0.85, 1.0, P));
+    const levelPitch = -0.06;
+    const basePitch = BASE_PITCH * (1 - diveE) + (levelPitch - 0.22 * diveSwoop) * diveE;
     targetPitch = basePitch + pointerPitch;
     pitch += (targetPitch - pitch) * Math.min(1, dt * 3);
 
-    // surface: ride the swell (and the big wave); then sink to the sea floor
-    // (the camera only rides a third of the wave's height, so it is never thrown up and slammed down)
+    // surface: ride the swell (and the big wave); then sink smoothly to the sea floor
     const swellH = surfaceHeight(camera.position.x, camera.position.z, t);
     const bigH = bigWaveH(camera.position.x, camera.position.z, t, waveZ, waveH);
     const surfAtCam = swellH + bigH;
-    const targetY = (swellH + 0.35 * bigH + 2.3) * (1 - diveE) + (UNDER_Y + Math.sin(t * 0.6) * 0.35) * diveE;
+    const targetY = (swellH + 0.35 * bigH + 2.3) * (1 - diveE) + (GROUND_Y + Math.sin(t * 0.5) * 0.12) * diveE;
     camY = camY === null ? targetY : camY + (targetY - camY) * Math.min(1, dt * 4 + 0.0001);
     camera.position.y = camY;
     camera.rotation.y = yaw;
     camera.rotation.x = pitch + Math.sin(t * 0.5) * 0.004;
     camera.rotation.z = Math.sin(t * 0.4) * 0.012; // Drone roll banking
 
-    const underMix = smooth01(0.0, 6.0, surfAtCam - camY);
+    const underMix = smooth01(0.0, 5.0, surfAtCam - camY);
     uniforms.uUnderMix.value = underMix;
     surfU.value = surfAtCam;
 
@@ -1476,7 +1488,7 @@ export function initOceanSunset(canvas, options) {
     // underwater world follows the camera (sea floor snapped to its grid so it never swims)
     underGroup.visible = underMix > 0.002;
     // ----- after the sea floor: the cloth floats in the same water; the camera stays where it is -----
-    clothActive = Q > 0.001;
+    clothActive = clothEnabled && Q > 0.001;
     clothGroup.visible = clothActive;
     if (clothActive) updateCloth(Q, dt);
     seabed.position.set(Math.floor(camera.position.x / SEABED_STEP) * SEABED_STEP, SEABED_Y,

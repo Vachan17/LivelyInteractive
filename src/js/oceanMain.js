@@ -6,7 +6,7 @@ const start = () => {
     const oceanCanvas = document.getElementById('c') || document.getElementById('ocean');
     if (oceanCanvas) {
         try {
-            const ocean = initOceanSunset(oceanCanvas, { projects: ['PROJECT 1', 'PROJECT 2', 'PROJECT 3', 'PROJECT 4'] });
+            const ocean = initOceanSunset(oceanCanvas, { cloth: false });
             if (ocean) ocean.resume();
         } catch (err) {
             console.error('OceanSunset error:', err);
