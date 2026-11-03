@@ -74,7 +74,7 @@ export function initSunsetArch(canvas) {
     const AW = 2.6, AS = 5.0, WZ = -12;
     const F = n => n.toFixed(2);
     const NUM_RIPPLES = 8;
-    const wallColUniform = new THREE.Vector3(0.58, 0.32, 0.31);
+    const wallColUniform = new THREE.Vector3(0.18, 0.36, 0.42);
 
     const GLSL = `
     #define NUM_RIPPLES 8
@@ -221,9 +221,9 @@ export function initSunsetArch(canvas) {
         const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
     }
     const nt = noiseTex(); nt.anisotropy = 8; nt.repeat.set(6, 6);
-    const wallM = new THREE.MeshStandardMaterial({ color: 0xb5706a, roughness: .88, bumpMap: nt, bumpScale: .06 });
-    const floorM = new THREE.MeshStandardMaterial({ color: 0xc07c74, roughness: .5, metalness: .02, bumpMap: nt, bumpScale: .12 });
-    const poolSideMat = new THREE.MeshStandardMaterial({ color: 0x7a3a40, roughness: .8, side: THREE.DoubleSide });
+    const wallM = new THREE.MeshStandardMaterial({ color: 0x2e5b6b, roughness: .88, bumpMap: nt, bumpScale: .06 });
+    const floorM = new THREE.MeshStandardMaterial({ color: 0x386d80, roughness: .5, metalness: .02, bumpMap: nt, bumpScale: .12 });
+    const poolSideMat = new THREE.MeshStandardMaterial({ color: 0x1f3f4a, roughness: .8, side: THREE.DoubleSide });
     const add = (m, s = true) => { m.castShadow = s; m.receiveShadow = true; scene.add(m); return m; };
 
     // Back wall with arch
@@ -435,7 +435,7 @@ export function initSunsetArch(canvas) {
             return { id: 'custom', name: 'Custom (' + presetKeyOrObj + ')', swatch: presetKeyOrObj };
         }
         if (!preset) {
-            preset = WALL_COLOR_PRESETS.terracotta;
+            preset = WALL_COLOR_PRESETS.aegean;
         }
 
         wallM.color.setHex(preset.wallHex);
@@ -451,10 +451,10 @@ export function initSunsetArch(canvas) {
         return preset;
     }
 
-    // Default to terracotta as featured on mobile
+    // Default to aegean (cool coastal teal stone) and clear any pink/terracotta
     let savedPresetKey = (typeof localStorage !== 'undefined' && localStorage.getItem('sunset_wall_preset'));
-    if (!savedPresetKey || savedPresetKey === 'aegean') {
-        savedPresetKey = 'terracotta';
+    if (!savedPresetKey || savedPresetKey === 'terracotta') {
+        savedPresetKey = 'aegean';
     }
     setWallColor(savedPresetKey);
 
